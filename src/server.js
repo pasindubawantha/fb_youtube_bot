@@ -15,7 +15,7 @@ const LOG_FILE = './log.txt'
 const HISTORY_FILE = './history.json'
 const QUOTA_FILE = './quota.json'
 const FACEBOOK_ACCESS_TOKEN = require('../secrets.js').facebook_token
-const SERVER_URL = "localhost"
+const SERVER_URL = "ec2-34-210-148-97.us-west-2.compute.amazonaws.com"
 const SERVER_PORT = 9000
 const YOUTUBE_CREDENTIALS = require('../secrets.js').youtube_credentials
 
