@@ -17,7 +17,6 @@ function fileerror(msg){
 	var massage = debug.getDate() + ' ' + msg
 	error(msg)
 	fileLogger(massage)
-	sendMail(msg)
 }
 function fileinfo(msg){
 	var massage = debug.getDate() + ' ' + msg
