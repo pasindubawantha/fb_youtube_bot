@@ -189,12 +189,12 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 				}
 
 				var videoOptions = {tags:tags,title:title,description:description,catogoryId:catogoryId,url:req['source']}
-				if(req['length'] < parameters.maxTitleLength && req['source'] != null){
+				if(req['length'] < parameters.maxVideoLength && req['source'] != null){
 					passdown.parameters = parameters
 					downloadVideo(counters, pageId, id, videoOptions, history, passdown)
 				}
 				else{
-					history[pageId].videos[videoId].passed = true
+					history[pageId].videos[id].passed = true
 					history[pageId].videos[id].processing = false
 					log.fileinfo('video too long video with id : ' + id)
 					processList(counters, pageId, passdown.list, parameters, history, passdown)
