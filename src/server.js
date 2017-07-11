@@ -255,8 +255,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		        snippet: {
 		            title: videoOptions.title,
 		            description: videoOptions.description,
-		            tags: videoOptions.tags,
-		            catogoryId: videoOptions.catogoryId
+		            tags: videoOptions.tags
 		        },
 		        status: {
 		            privacyStatus: "public",
