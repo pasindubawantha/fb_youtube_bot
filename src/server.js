@@ -1,6 +1,5 @@
 var graph = require('fbgraph')
 var jsonfile = require('jsonfile')
-var downloader = require('download-file')
 var youtube = require('youtube-api')
 var fs = require('fs')
 var prettybytes = require('pretty-bytes')
