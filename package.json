@@ -1,0 +1,24 @@
+{
+  "name": "fb_youtube_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pasindu Perera",
+  "license": "ISC",
+  "dependencies": {
+    "bug-killer": "^4.4.4",
+    "fbgraph": "^1.4.1",
+    "fs": "0.0.1-security",
+    "jsonfile": "^3.0.1",
+    "lien": "^3.0.4",
+    "mkpath": "^1.0.0",
+    "node-mailjet": "^3.1.0",
+    "pretty-bytes": "^4.0.2",
+    "request-progress": "^3.0.0",
+    "youtube-api": "^2.0.8"
+  }
+}
