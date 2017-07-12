@@ -122,7 +122,7 @@ function bootstrap(counters, pages, history) {
     	})
 	}else{
 		STOPPED = true
-		log.info("Done !")
+		log.fileerror("Done !")
 	}
 }
 
