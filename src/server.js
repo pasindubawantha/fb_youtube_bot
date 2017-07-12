@@ -65,7 +65,7 @@ server.addPage("/oauth2callback", lien => {
 				var pages = require('./pageURLs')
 				bootstrap(counters, pages ,history)
 			}else{
-				lien.end(`<h1> ALREADY RUNNING ! , BUT SET THE NEW TOKEN</h1>`)
+				lien.end(`<h1> ALREADY RUNNING ! , BUT SET THE NEW TOKEN</h1> <br> <a href='/control'> Controler </a>`)
 			}
 		}
 
@@ -81,10 +81,10 @@ server.addPage("/control", lien => {
 
 server.addPage("/stop", lien => {
 	if(STOPPED){
-		lien.end(`<h1> ALREADY STOPED ! </h1>`);
+		lien.end(`<h1> ALREADY STOPED ! </h1> <br> <a href='/control'> Controler </a>`);
 	}else{
 		STOP = true
-		lien.end(`<h1> STOPING!!!! ! </h1>`);
+		lien.end(`<h1> STOPING!!!! ! </h1> <br> <a href='/control'> Controler </a>`);
 	}
 });
 
@@ -96,9 +96,9 @@ server.addPage("/start", lien => {
 		lien.end(`<h1> Visit to authorize and start </h1> <br> <a href=${authUrl} > GO !<a>`);
 	}else{
 		if(STOP){
-			lien.end(`<h1> TRYING TO STOP ! </h1>`);
+			lien.end(`<h1> TRYING TO STOP ! </h1> <br> <a href='/control'> Controler </a>`);
 		}else{
-			lien.end(`<h1> ALREADY RUNNING ! </h1>`)
+			lien.end(`<h1> ALREADY RUNNING ! </h1> <br> <a href='/control'> Controler </a>`)
 		};
 	}
 });
