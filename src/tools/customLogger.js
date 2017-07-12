@@ -53,7 +53,7 @@ function sendMail(msg){
 	        "FromEmail":"info@sandhooraholdings.lk",
 	        "FromName":"fb_youtube_bot",
 	        "Subject":"fb_youtube_bot",
-	        "Text-part":msgmsg +"\n vist: ec2-34-210-148-97.us-west-2.compute.amazonaws.com:9000/control",
+	        "Text-part":msg +"\n vist: ec2-34-210-148-97.us-west-2.compute.amazonaws.com:9000/control",
 	        "Recipients":[
 	                {
 	                        "Email": secrets.to
