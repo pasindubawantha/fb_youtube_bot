@@ -56,7 +56,7 @@ server.addPage("/oauth2callback", lien => {
 	    }else{
 			log.info("Got the tokens.");
 			oauth.setCredentials(tokens);
-			lien.end("<h1> Done ! </h1>");
+			lien.end("<h1> Done ! , STARTED </h1> <br> <a href='/control'> Controler </a>");
 			var counters = [0,0]
 			var history = jsonfile.readFileSync(HISTORY_FILE)
 			var pages = require('./pageURLs')
@@ -73,21 +73,16 @@ server.addPage("/control", lien => {
 	function stop(){
     	STOP = true
     }
-    function start(){
-    	if(STOPPED){
-    		STOPPED = false
-    		STOP = false
-    		var counters = [0,0]
-			var history = jsonfile.readFileSync(HISTORY_FILE)
-			var pages = require('./pageURLs')
-			bootstrap(counters, pages ,history)
-    	}
-    }
-    if(STOPPED){
-    	lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> <button onclick="${start()}">START !</button>`);
-    }
-    else{
-		lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> <button onclick="${stop()}">STOP !</button>`);
+		lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> <button onclick="${stop()}">STOP !</button> <br> to start visit <a href="/start">START</a>`);
+});
+
+server.addPage("/start", lien => {
+	if(STOPPED){
+		STOPPED = false
+		STOP = false
+		lien.end(`<h1> Visit to authorize and start </h1> <br> <a href=${authUrl} > GO !<a>`);
+	}else{
+		lien.end(`<h1> ALREADY RUNNING ! </h1>`);
 	}
 });
 
