@@ -20,7 +20,7 @@ const SERVER_PORT = 9000
 const YOUTUBE_CREDENTIALS = require('../secrets.js').youtube_credentials
 
 var STOP = false
-var STOPPED = false
+var STOPPED = true
 
 jsonfile.spaces = 4
 var quota = jsonfile.readFileSync(QUOTA_FILE)
@@ -56,6 +56,8 @@ server.addPage("/oauth2callback", lien => {
 	    }else{
 	    	oauth.setCredentials(tokens);
 	    	if(STOPPED){
+	    		STOPPED = false
+	    		STOP = false
 				log.info("Got the tokens.");
 				lien.end("<h1> Done ! , STARTED </h1> <br> <a href='/control'> Controler </a>");
 				var counters = [0,0]
