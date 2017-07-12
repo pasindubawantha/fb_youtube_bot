@@ -19,6 +19,8 @@ const SERVER_URL = "ec2-34-210-148-97.us-west-2.compute.amazonaws.com"
 const SERVER_PORT = 9000
 const YOUTUBE_CREDENTIALS = require('../secrets.js').youtube_credentials
 
+var STOP = false
+
 jsonfile.spaces = 4
 var quota = jsonfile.readFileSync(QUOTA_FILE)
 //for Facebook
@@ -49,8 +51,7 @@ server.addPage("/oauth2callback", lien => {
     log.info("Trying to get the token using the following code: " + lien.query.code);
     oauth.getToken(lien.query.code, (err, tokens) =>{
     	if (err) {
-    		lien.lien(err, 400);
-        	console.log(err)
+        	log.stack(err)
 	    }else{
 			log.info("Got the tokens.");
 			oauth.setCredentials(tokens);
@@ -63,21 +64,16 @@ server.addPage("/oauth2callback", lien => {
 
     });
 });
-
-function begin(err, tokens){
-	if (err) {
-        console.log(err)
-    }else{
-
-		log.info("Got the tokens.");
-		oauth.setCredentials(tokens);
-		lien.end("<h1> Done ! </h1>");
-		var counters = [0,0]
-		var history = jsonfile.readFileSync(HISTORY_FILE)
-		var pages = require('./pageURLs')
-		bootstrap(counter, pages ,history)
-	}
-}
+//control stuff
+server.addStaticPath('/history.json', "./history.json")
+server.addStaticPath('/log.txt', "./log.txt")
+server.addStaticPath('/errorlog.txt', "./errorlog.txt")
+server.addPage("/control", lien => {
+	function stop(){
+    	STOP = true
+    }
+	lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> <button onclick="${stop()}">STOP !</button>`);
+});
 
 
 //life cycles
@@ -89,7 +85,7 @@ function bootstrap(counters, pages, history) {
 		graph.get("?id=" + urlparser(page.url), function(err,req){
 			if(err){
 				log.fileerror('cannot get page id of ' + page.url)
-				console.log(err)
+				log.stack(err)
 				bootstrap(counters, pages, history)
 			}else{
 				var passdown={pages:pages}
@@ -111,7 +107,7 @@ function processPage(counters, page , parameters, history, passdown){
 	graph.get(id + "/videos", function(err, req){
 		if(err){
 			log.fileerror('cannot get videos of page with id : ' + id)
-			console.log(err)
+			log.stack(err)
 			bootstrap(counters, passdown.pages, history)
 		}else{
 			
@@ -133,7 +129,7 @@ function processList(counters, pageId, list, parameters, history, passdown){
 		graph.get(paging.next, function(err, req){
 			if(err){
 				log.fileerror('error getting next video page with id : ' + pageId)
-				console.log(err)
+				log.stack(err)
 				bootstrap(counters, passdown.pages, history)
 			}else{
 				counters[1]=0
@@ -146,6 +142,11 @@ function processList(counters, pageId, list, parameters, history, passdown){
 }
 
 function processVideo(counters, pageId , video, parameters, history, passdown){
+	if(STOP){
+		log.error(" Stoped by master ")
+		counters[0] = passdown.pages.length
+		bootstrap(counters, passdown.pages, history)
+	}
 	var { id,description } = video
 	log.info('procesessing video : ' + id + ' | ' + description)
 	if(history[pageId].videos[id] == null){
@@ -158,7 +159,7 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 			if(err){
 				history[pageId].videos[id].processing = false
 				log.fileerror('error getting info video with id : ' + id)
-				console.log(err)
+				log.stack(err)
 				processList(counters, pageId, passdown.list, parameters, history, passdown)
 			}else{
 				var tags = parameters.tags
@@ -223,7 +224,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 			log.info(`downloading video id : ${videoId} | ${prettybytes(state.size.transferred)} / ${prettybytes(state.size.total)} ${Math.round(state.percent*100)}% @ ${state.speed}s`)
 		}).on('error', function (err) {
 			log.fileerror('error downloading video with id : ' + videoId)
-			console.log(err)
+			log.stack(err)
 			quota.downloaded += videoOptions.size
 	    	history[pageId].videos[videoId].failed = true
 	    	history[pageId].videos[videoId].processing = false
@@ -271,7 +272,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 			history[pageId].videos[videoId].processing = false
 			if(err){
 				log.fileerror('error uploading video with id : ' + videoId)
-				console.log(err)
+				log.stack(err)
 				history[pageId].videos[videoId].failed = true
 				history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
