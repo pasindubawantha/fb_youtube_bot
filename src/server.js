@@ -91,8 +91,6 @@ server.addPage("/stop", lien => {
 
 server.addPage("/start", lien => {
 	if(STOPPED){
-		STOPPED = false
-		STOP = false
 		lien.end(`<h1> Visit to authorize and start </h1> <br> <a href=${authUrl} > GO !<a>`);
 	}else{
 		if(STOP){
