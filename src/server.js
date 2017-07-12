@@ -291,6 +291,10 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 				history[pageId].videos[videoId].failed = true
 				history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
+		    	console.log("##################################################################")
+		    	console.log(err)
+		    	console.log("##################################################################")
+		    	console.log(err['Error'])
 		    	if(err['Error'] == "The user has exceeded the number of videos they may upload."){
 		    		log.error("STOPED PROCESSING for 24 hours " )
 		    		setTimeout(
