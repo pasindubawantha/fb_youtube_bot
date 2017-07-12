@@ -294,7 +294,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    	console.log("##################################################################")
 		    	console.log(err)
 		    	console.log("##################################################################")
-		    	console.log(err['Error'])
+		    	console.log(err['errors'])
 		    	if(err['Error'] == "The user has exceeded the number of videos they may upload."){
 		    		log.error("STOPED PROCESSING for 24 hours " )
 		    		setTimeout(
