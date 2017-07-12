@@ -292,8 +292,8 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 				history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
 		    	console.log("##################################################################")
-		    	console.log(err['Error'][0]['reason'])
-		    	if(err['Error'][0]['reason'] == "quotaExceeded"){
+		    	console.log(err['errors'][0]['reason'])
+		    	if(err['errors'][0]['reason'] == "quotaExceeded"){
 		    		log.error("STOPED PROCESSING for 24 hours " )
 		    		setTimeout(
 		    			function (){
