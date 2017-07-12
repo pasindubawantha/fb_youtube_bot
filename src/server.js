@@ -291,6 +291,20 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 				history[pageId].videos[videoId].failed = true
 				history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
+		    	if(err['Error'] == "The user has exceeded the number of videos they may upload."){
+		    		log.error("STOPED PROCESSING for 24 hours " )
+		    		setTimeout(
+		    			function (){
+		    				log.error("STARTED PROCESSING" )
+		    				var counters = [0,0]
+							var history = jsonfile.readFileSync(HISTORY_FILE)
+							var pages = require('./pageURLs')
+							bootstrap(counters, pages ,history)
+		    			}, 86400000);
+
+		    	}else{
+		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+		    	}
 			}
 		    else{
 		    	quota.uploaded += videoOptions.size
@@ -301,8 +315,8 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    	if(quota.uploaded >= quota.maxupload && quota.maxupload > 0){
 		    		log.error("max upload limit met")
 		    	}
+		    	processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    }
-			processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		})
 		setTimeout(function (){uploadspeed()}, 2000);
 	}else{
