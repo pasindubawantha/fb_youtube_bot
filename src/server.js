@@ -54,13 +54,17 @@ server.addPage("/oauth2callback", lien => {
     	if (err) {
         	log.stack(err)
 	    }else{
-			log.info("Got the tokens.");
-			oauth.setCredentials(tokens);
-			lien.end("<h1> Done ! , STARTED </h1> <br> <a href='/control'> Controler </a>");
-			var counters = [0,0]
-			var history = jsonfile.readFileSync(HISTORY_FILE)
-			var pages = require('./pageURLs')
-			bootstrap(counters, pages ,history)
+	    	oauth.setCredentials(tokens);
+	    	if(STOPPED){
+				log.info("Got the tokens.");
+				lien.end("<h1> Done ! , STARTED </h1> <br> <a href='/control'> Controler </a>");
+				var counters = [0,0]
+				var history = jsonfile.readFileSync(HISTORY_FILE)
+				var pages = require('./pageURLs')
+				bootstrap(counters, pages ,history)
+			}else{
+				lien.end(`<h1> ALREADY RUNNING ! , BUT SET THE NEW TOKEN</h1>`)
+			}
 		}
 
     });
@@ -82,7 +86,11 @@ server.addPage("/start", lien => {
 		STOP = false
 		lien.end(`<h1> Visit to authorize and start </h1> <br> <a href=${authUrl} > GO !<a>`);
 	}else{
-		lien.end(`<h1> ALREADY RUNNING ! </h1>`);
+		if(STOP){
+			lien.end(`<h1> TRYING TO STOP ! </h1>`);
+		}else{
+			lien.end(`<h1> ALREADY RUNNING ! </h1>`)
+		};
 	}
 });
 
