@@ -236,6 +236,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 			jsonfile.writeFileSync(QUOTA_FILE, quota)
 	    	log.info("video downloaded id : " + videoId + " file : " + videoOptions.file)
 		    history[pageId].videos[videoId].downloaded = true
+		    history[pageId].videos[videoId].file = videoOptions.file
 		    history[pageId].videos[videoId].time_processed = debug.getDate()
 		    jsonfile.writeFileSync(HISTORY_FILE, history)
 		    if(quota.uploaded >= quota.maxupload && quota.maxupload > 0){
@@ -245,6 +246,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 		}).pipe(fs.createWriteStream(videoOptions.file));
 	}else{
 		log.warn("video already downloaded id : " + videoId + " file : " + videoOptions.file)
+		videoOptions.file = history[pageId].videos[videoId].file
 		uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 	}
 }
