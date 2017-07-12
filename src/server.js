@@ -20,6 +20,7 @@ const SERVER_PORT = 9000
 const YOUTUBE_CREDENTIALS = require('../secrets.js').youtube_credentials
 
 var STOP = false
+var STOPPED = false
 
 jsonfile.spaces = 4
 var quota = jsonfile.readFileSync(QUOTA_FILE)
@@ -71,8 +72,28 @@ server.addStaticPath('/errorlog.txt', "./errorlog.txt")
 server.addPage("/control", lien => {
 	function stop(){
     	STOP = true
+    	if(STOPPED){
+    		alert("refresh the page")
+    	}
     }
-	lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> <button onclick="${stop()}">STOP !</button>`);
+    function start(){
+    	if(STOPPED){
+    		STOPPED = false
+    		STOP = false
+    		var counters = [0,0]
+			var history = jsonfile.readFileSync(HISTORY_FILE)
+			var pages = require('./pageURLs')
+			bootstrap(counters, pages ,history)
+    	}else{
+    		alert("refresh the page")
+    	}
+    }
+    if(STOPPED){
+    	lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> <button onclick="${start()}">START !</button>`);
+    }
+    else{
+		lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> <button onclick="${stop()}">STOP !</button>`);
+	}
 });
 
 
@@ -93,6 +114,7 @@ function bootstrap(counters, pages, history) {
 			}
     	})
 	}else{
+		STOPPED = true
 		log.info("Done !")
 	}
 }
@@ -146,71 +168,72 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 		log.error(" Stoped by master ")
 		counters[0] = passdown.pages.length
 		bootstrap(counters, passdown.pages, history)
-	}
-	var { id,description } = video
-	log.info('procesessing video : ' + id + ' | ' + description)
-	if(history[pageId].videos[id] == null){
-		history[pageId].videos[id] = {description: description, processing: false ,downloaded: false, uploaded: false, time_processed: debug.getDate() }
-	}
-	if(!history[pageId].videos[id].processing){
-		history[pageId].videos[id].processing = true
-		var fields = {fields : "content_tags,description,content_category,length,title,source"}
-		graph.get(id,fields, function(err,req){
-			if(err){
-				history[pageId].videos[id].processing = false
-				log.fileerror('error getting info video with id : ' + id)
-				log.stack(err)
-				processList(counters, pageId, passdown.list, parameters, history, passdown)
-			}else{
-				var tags = parameters.tags
-				var title = parameters.title
-				var discription = parameters.discription
-				var catogoryId = parameters.catogoryId
-				if(req['description'] != null){
-					if(req['description'].length > parameters.minDescriptionLength){
-						discription = req['description']
-						if(req['description'].length < parameters.maxTitleLength){
-							title = req['description']
-						}
-					}
-				}
-				if(req['title'] != null){
-					if(req['title'].length > parameters.minTitleLength){
-						title = req['title']
-						if(req['description'] === null){
-							discription = req['title']
-						}
-					}
-				}
-				if(req['content_tags'] != null){
-					tags = tags.concat(req['content_tags'])
-				}
-				if(req['content_category'] != null){
-					tags.push(req['content_category'])
-				}
-
-				var videoOptions = {tags:tags,title:title,description:description,catogoryId:catogoryId,url:req['source']}
-				if(req['length'] < parameters.maxVideoLength && req['source'] != null){
-					passdown.parameters = parameters
-					downloadVideo(counters, pageId, id, videoOptions, history, passdown)
-				}
-				else{
-					history[pageId].videos[id].passed = true
-					history[pageId].videos[id].processing = false
-					log.fileinfo('video too long video with id : ' + id)
-					processList(counters, pageId, passdown.list, parameters, history, passdown)
-				}
-			}
-		})
 	}else{
-		log.warn("Video " + id + " already processing")
-		processList(counters, pageId, passdown.list, parameters, history, passdown)
+		var { id,description } = video
+		log.info('procesessing video : ' + id + ' | ' + description)
+		if(history[pageId].videos[id] == null){
+			history[pageId].videos[id] = {description: description, processing: false ,downloaded: false, uploaded: false, time_processed: debug.getDate() }
+		}
+		if(!history[pageId].videos[id].processing){
+			history[pageId].videos[id].processing = true
+			var fields = {fields : "content_tags,description,content_category,length,title,source"}
+			graph.get(id,fields, function(err,req){
+				if(err){
+					history[pageId].videos[id].processing = false
+					log.fileerror('error getting info video with id : ' + id)
+					log.stack(err)
+					processList(counters, pageId, passdown.list, parameters, history, passdown)
+				}else{
+					var tags = parameters.tags
+					var title = parameters.title
+					var discription = parameters.discription
+					var catogoryId = parameters.catogoryId
+					if(req['description'] != null){
+						if(req['description'].length > parameters.minDescriptionLength){
+							discription = req['description']
+							if(req['description'].length < parameters.maxTitleLength){
+								title = req['description']
+							}
+						}
+					}
+					if(req['title'] != null){
+						if(req['title'].length > parameters.minTitleLength){
+							title = req['title']
+							if(req['description'] === null){
+								discription = req['title']
+							}
+						}
+					}
+					if(req['content_tags'] != null){
+						tags = tags.concat(req['content_tags'])
+					}
+					if(req['content_category'] != null){
+						tags.push(req['content_category'])
+					}
+
+					var videoOptions = {tags:tags,title:title,description:description,catogoryId:catogoryId,url:req['source']}
+					if(req['length'] < parameters.maxVideoLength && req['source'] != null){
+						passdown.parameters = parameters
+						downloadVideo(counters, pageId, id, videoOptions, history, passdown)
+					}
+					else{
+						history[pageId].videos[id].passed = true
+						history[pageId].videos[id].processing = false
+						log.fileinfo('video too long video with id : ' + id)
+						processList(counters, pageId, passdown.list, parameters, history, passdown)
+					}
+				}
+			})
+		}else{
+			log.warn("Video " + id + " already processing")
+			processList(counters, pageId, passdown.list, parameters, history, passdown)
+		}
 	}
 }
 
 
 function downloadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0)){
+	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0) & !STOP){
 		var  directory = "./videos/" + pageId + '/'
 		var filename = videoId + '.mp4'
 		videoOptions.file = directory + filename
@@ -252,7 +275,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 }
 
 function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0)){
+	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0) & !STOP){
 		var req = youtube.videos.insert({
 		    resource: {
 		        snippet: {
