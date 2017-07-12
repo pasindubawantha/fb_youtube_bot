@@ -72,9 +72,6 @@ server.addStaticPath('/errorlog.txt', "./errorlog.txt")
 server.addPage("/control", lien => {
 	function stop(){
     	STOP = true
-    	if(STOPPED){
-    		alert("refresh the page")
-    	}
     }
     function start(){
     	if(STOPPED){
@@ -84,8 +81,6 @@ server.addPage("/control", lien => {
 			var history = jsonfile.readFileSync(HISTORY_FILE)
 			var pages = require('./pageURLs')
 			bootstrap(counters, pages ,history)
-    	}else{
-    		alert("refresh the page")
     	}
     }
     if(STOPPED){
