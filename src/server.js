@@ -76,11 +76,18 @@ server.addStaticPath('/history.json', "./history.json")
 server.addStaticPath('/log.txt', "./log.txt")
 server.addStaticPath('/errorlog.txt', "./errorlog.txt")
 server.addPage("/control", lien => {
-	function stop(){
-    	STOP = true
-    }
-		lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> <button onclick="${stop()}">STOP !</button> <br> to start visit <a href="/start">START</a>`);
+		lien.end(`<h1> CONTROLLER </h1> <a href="/history.json">history.json</a> <br> <a href="/log.txt">log.txt</a> <br> <a href="/errorlog.txt">errorlog.txt</a> <br> to stop visit <a href="/stop">STOP</a> <br> to start visit <a href="/start">START</a>`);
 });
+
+server.addPage("/stop", lien => {
+	if(STOPPED){
+		lien.end(`<h1> ALREADY STOPED ! </h1>`);
+	}else{
+		STOP = true
+		lien.end(`<h1> STOPING!!!! ! </h1>`);
+	}
+});
+
 
 server.addPage("/start", lien => {
 	if(STOPPED){
