@@ -306,9 +306,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 				history[pageId].videos[videoId].failed = true
 				history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
-		    	console.log("############################################################")
-		    	console.log(err['errors'][0]['reason'])
-		    	if(err['errors'][0]['reason'] === "quotaExceeded"){
+		    	if(err['errors'][0]['reason'] == "quotaExceeded" || err['errors'][0]['reason'] == "uploadLimitExceeded" || err['errors'][0]['reason'] == "rateLimitExceeded"){
 		    		log.fileerror("STOPED PROCESSING for 24 hours " )
 		    		setTimeout(
 		    			function (){
@@ -319,6 +317,8 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 							bootstrap(counters, pages ,history)
 		    			}, 86400000);
 
+		    	}else if(err['errors'][0]['reason'] == "authorizationRequired" || err['errors'][0]['reason'] == "forbidden"){
+		    		log.fileerror('Reaouthorize from ' + authUrl)
 		    	}else{
 		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    	}
