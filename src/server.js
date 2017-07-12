@@ -172,7 +172,7 @@ function processList(counters, pageId, list, parameters, history, passdown){
 
 function processVideo(counters, pageId , video, parameters, history, passdown){
 	if(STOP){
-		log.error(" Stoped by master ")
+		log.fileerror(" Stoped by master ")
 		counters[0] = passdown.pages.length
 		bootstrap(counters, passdown.pages, history)
 	}else{
@@ -270,7 +270,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 		    history[pageId].videos[videoId].time_processed = debug.getDate()
 		    jsonfile.writeFileSync(HISTORY_FILE, history)
 		    if(quota.uploaded >= quota.maxupload && quota.maxupload > 0){
-		    		log.error("max upload limit met")
+		    		log.fileerror("max upload limit met")
 		    	}
 		    uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		}).pipe(fs.createWriteStream(videoOptions.file));
@@ -309,10 +309,10 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 				history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
 		    	if(err['errors'][0]['reason'] == "quotaExceeded"){
-		    		log.error("STOPED PROCESSING for 24 hours " )
+		    		log.fileerror("STOPED PROCESSING for 24 hours " )
 		    		setTimeout(
 		    			function (){
-		    				log.error("STARTED PROCESSING" )
+		    				log.fileerror("STARTED PROCESSING" )
 		    				var counters = [0,0]
 							var history = jsonfile.readFileSync(HISTORY_FILE)
 							var pages = require('./pageURLs')
@@ -330,7 +330,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    	history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
 		    	if(quota.uploaded >= quota.maxupload && quota.maxupload > 0){
-		    		log.error("max upload limit met")
+		    		log.fileerror("max upload limit met")
 		    	}
 		    	processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    }

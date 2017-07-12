@@ -6,7 +6,6 @@ const LOG_STACK_FILE = './errorlog.txt'
 
 function error(msg){
 		debug.error(debug.getDate().concat(" ").concat(msg))
-		fileLogger(msg)
 		sendMail(msg)
 }
 function info(msg){
