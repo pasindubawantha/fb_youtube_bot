@@ -335,6 +335,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		})
 		setTimeout(function (){uploadspeed()}, 2000);
 	}else{
+		history[pageId].videos[videId].processing = false
 		log.warn("video already uploaded id : " + videoId + " file : " + videoOptions.file)
 		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 	}
