@@ -127,7 +127,7 @@ function bootstrap(counters, pages, history) {
 
 function processPage(counters, page , parameters, history, passdown){
 	var { name,id } = page
-	log.info('procesessing page : ' + id + ' | ' + name)
+	log.fileinfo('procesessing page : ' + id + ' | ' + name)
 	if(history[id] == null){
 		history[id] = {name: name, processed_on: debug.getDate(), videos: {}}
 	}
@@ -238,7 +238,7 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 
 
 function downloadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0) & !STOP){
+	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0) && !STOP){
 		var  directory = "./videos/" + pageId + '/'
 		var filename = videoId + '.mp4'
 		videoOptions.file = directory + filename
@@ -280,7 +280,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 }
 
 function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0) & !STOP){
+	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0) && !STOP){
 		var req = youtube.videos.insert({
 		    resource: {
 		        snippet: {
@@ -338,6 +338,10 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		setTimeout(function (){uploadspeed()}, 2000);
 	}else{
 		history[pageId].videos[videoId].processing = false
+		console.log("####################################################")
+		console.log(!history[pageId].videos[videoId].uploaded)
+		console.log((quota.uploaded < quota.maxupload || quota.maxupload == 0) )
+		console.log(!STOP)
 		log.warn("video already uploaded id : " + videoId + " file : " + videoOptions.file)
 		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 	}
