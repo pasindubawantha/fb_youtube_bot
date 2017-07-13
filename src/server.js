@@ -238,7 +238,7 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 
 
 function downloadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0) && !STOP){
+	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0 || quota.downloaded == null) && !STOP){
 		var  directory = "./videos/" + pageId + '/'
 		var filename = videoId + '.mp4'
 		videoOptions.file = directory + filename
@@ -253,14 +253,24 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 		}).on('error', function (err) {
 			log.fileerror('error downloading video with id : ' + videoId)
 			log.stack(err)
-			quota.downloaded += videoOptions.size
+			if(quota.downloaded == null){
+				quota.downloaded = jsonfile.readFileSync(QUOTA_FILE).downloaded
+			}
+			if(videoOptions.size > 0){
+				quota.downloaded += videoOptions.size
+	    	}
 	    	history[pageId].videos[videoId].failed = true
 	    	history[pageId].videos[videoId].processing = false
 	    	history[pageId].videos[videoId].time_processed = debug.getDate()
 		    jsonfile.writeFileSync(HISTORY_FILE, history)
 	    	processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)  
 		}).on('end', function () {
-			quota.downloaded += videoOptions.size
+			if(quota.downloaded == null){
+				quota.downloaded = jsonfile.readFileSync(QUOTA_FILE).downloaded
+			}
+			if(videoOptions.size > 0){
+				quota.downloaded += videoOptions.size
+	    	}
 			jsonfile.writeFileSync(QUOTA_FILE, quota)
 	    	log.info("video downloaded id : " + videoId + " file : " + videoOptions.file)
 		    history[pageId].videos[videoId].downloaded = true
@@ -280,7 +290,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 }
 
 function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0) && !STOP){
+	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null) && !STOP){
 		var req = youtube.videos.insert({
 		    resource: {
 		        snippet: {
@@ -324,7 +334,12 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    	}
 			}
 		    else{
-		    	quota.uploaded += videoOptions.size
+		    	if(quota.uploaded == null){
+					quota.uploaded = jsonfile.readFileSync(QUOTA_FILE).uploaded
+				}
+				if(videoOptions.size > 0){
+					quota.uploaded += videoOptions.size
+		    	}
 		    	log.info("video uploaded id : " + videoId + " file : " + videoOptions.file)
 		    	history[pageId].videos[videoId].uploaded = true
 		    	history[pageId].videos[videoId].time_processed = debug.getDate()
@@ -338,10 +353,6 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		setTimeout(function (){uploadspeed()}, 2000);
 	}else{
 		history[pageId].videos[videoId].processing = false
-		console.log("####################################################")
-		console.log(!history[pageId].videos[videoId].uploaded)
-		console.log((quota.uploaded < quota.maxupload || quota.maxupload == 0) )
-		console.log(!STOP)
 		log.warn("video already uploaded id : " + videoId + " file : " + videoOptions.file)
 		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 	}
