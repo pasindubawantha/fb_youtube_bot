@@ -309,6 +309,8 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		        body: fs.createReadStream(videoOptions.file)
 		    }
 		}, function(err, data){
+			console.log("########################################")
+			console.log(videoOptions.tags)
 			history[pageId].videos[videoId].processing = false
 			if(err){
 				log.fileerror('error uploading video with id : ' + videoId)
