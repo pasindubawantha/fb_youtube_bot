@@ -213,7 +213,6 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 						tags = tags.concat(req['content_tags'])
 					}
 					if(req['content_category'] != null){
-						tags.push(req['content_category'])
 					}
 
 					var videoOptions = {tags:tags,title:title,description:description,catogoryId:catogoryId,url:req['source']}
