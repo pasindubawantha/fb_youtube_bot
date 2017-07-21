@@ -215,6 +215,16 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 					if(req['content_category'] != null){
 					}
 
+					if(history[pageId].videos[id].uploadError != null){
+						if(history[pageId].videos[id].uploadError == "invalidTitle"){
+							title = parameters.title
+						}else if(history[pageId].videos[id].uploadError == "invalidDescription"){
+							discription = parameters.discription
+						}else if(history[pageId].videos[id].uploadError == "invalidTags"){
+							tags = parameters.tags
+						}
+					}
+
 					var videoOptions = {tags:tags,title:title,description:description,catogoryId:catogoryId,url:req['source']}
 					if(req['length'] < parameters.maxVideoLength && req['source'] != null){
 						passdown.parameters = parameters
