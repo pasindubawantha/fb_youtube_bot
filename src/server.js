@@ -258,7 +258,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 			if(videoOptions.size > 0){
 				quota.downloaded += videoOptions.size
 	    	}
-	    	history[pageId].videos[videoId].failed = true
+	    	history[pageId].videos[videoId].downloadFailed = true
 	    	history[pageId].videos[videoId].processing = false
 	    	history[pageId].videos[videoId].time_processed = debug.getDate()
 		    jsonfile.writeFileSync(HISTORY_FILE, history)
@@ -314,7 +314,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 			if(err){
 				log.fileerror('error uploading video with id : ' + videoId)
 				log.stack(err)
-				history[pageId].videos[videoId].failed = true
+				history[pageId].videos[videoId].uploadFailed = true
 				history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
 		    	if(err['errors'][0]['reason'] == "quotaExceeded" || err['errors'][0]['reason'] == "uploadLimitExceeded" || err['errors'][0]['reason'] == "rateLimitExceeded"){
@@ -330,6 +330,9 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 
 		    	}else if(err['errors'][0]['reason'] == "authorizationRequired" || err['errors'][0]['reason'] == "forbidden"){
 		    		log.fileerror('Reaouthorize from ' + authUrl)
+		    	}else if(err['errors'][0]['reason'] == "invalidTitle" || err['errors'][0]['reason'] == "invalidDescription"){
+		    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
+		    		jsonfile.writeFileSync(HISTORY_FILE, history)
 		    	}else{
 		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    	}
