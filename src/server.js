@@ -216,11 +216,15 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 					}
 
 					if(history[pageId].videos[id].uploadError != null){
-						console.log("###########################################")
+						console.log("######################----###################")
+						console.log(history[pageId].videos[id])
+						console.log(history[pageId].videos[id].uploadError)
 						if(history[pageId].videos[id].uploadError == "invalidTitle"){
 							title = parameters.title
+							console.log("invalid title ran")
 						}else if(history[pageId].videos[id].uploadError == "invalidDescription"){
 							description = parameters.description
+							console.log("invalid description ran")
 						}else if(history[pageId].videos[id].uploadError == "invalidTags"){
 							tags = parameters.tags
 						}
@@ -330,6 +334,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 					history[pageId].videos[videoId].uploadFailed = true
 					history[pageId].videos[videoId].time_processed = debug.getDate()
 		    		jsonfile.writeFileSync(HISTORY_FILE, history)
+		    		//processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    	}else if(err['errors'][0]['reason'] == "quotaExceeded" || err['errors'][0]['reason'] == "uploadLimitExceeded" || err['errors'][0]['reason'] == "rateLimitExceeded"){
 		    		log.fileerror("STOPED PROCESSING for 24 hours ", true)
 		    		setTimeout(
