@@ -216,6 +216,8 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 					}
 
 					if(history[pageId].videos[id].uploadError != null){
+						console.log("###########################################")
+						console.log(err['errors'][0]['reason'])
 						if(history[pageId].videos[id].uploadError == "invalidTitle"){
 							title = parameters.title
 						}else if(history[pageId].videos[id].uploadError == "invalidDescription"){
@@ -320,14 +322,12 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		}, function(err, data){
 			history[pageId].videos[videoId].processing = false
 			if(err){
-				console.log("###########################################")
-				console.log(err['errors'][0]['reason'])
 		    	if(err['errors'][0]['reason'] == "invalidTitle" || err['errors'][0]['reason'] == "invalidDescription"){
-		    		console.log("########################################")
-		    		console.log(videoOptions)
 		    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
 		    		log.fileerror('error uploading video with id : ' + videoId)
 					log.stack(err)
+					console.log("########################################")
+		    		console.log(videoOptions)
 					history[pageId].videos[videoId].uploadFailed = true
 					history[pageId].videos[videoId].time_processed = debug.getDate()
 		    		jsonfile.writeFileSync(HISTORY_FILE, history)
