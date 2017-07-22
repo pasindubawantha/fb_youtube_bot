@@ -219,12 +219,9 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 						console.log("######################----###################")
 						console.log(history[pageId].videos[id])
 						console.log(history[pageId].videos[id].uploadError)
-						if(history[pageId].videos[id].uploadError == "invalidTitle"){
+						if(history[pageId].videos[id].uploadError == "invalidTitle" || history[pageId].videos[id].uploadError == "invalidDescription"){
 							title = parameters.title
-							console.log("invalid title ran")
-						}else if(history[pageId].videos[id].uploadError == "invalidDescription"){
 							description = parameters.description
-							console.log("invalid description ran")
 						}else if(history[pageId].videos[id].uploadError == "invalidTags"){
 							tags = parameters.tags
 						}
