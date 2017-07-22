@@ -217,7 +217,6 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 
 					if(history[pageId].videos[id].uploadError != null){
 						console.log("###########################################")
-						console.log(err['errors'][0]['reason'])
 						if(history[pageId].videos[id].uploadError == "invalidTitle"){
 							title = parameters.title
 						}else if(history[pageId].videos[id].uploadError == "invalidDescription"){
