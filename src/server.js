@@ -110,7 +110,7 @@ function bootstrap(counters, pages, history) {
 		counters[0]++
 		graph.get("?id=" + urlparser(page.url), function(err,req){
 			if(err){
-				log.fileerror('cannot get page id of ' + page.url)
+				log.fileerror('cannot get page id of ' + page.url, true)
 				log.stack(err)
 				bootstrap(counters, pages, history)
 			}else{
@@ -120,7 +120,7 @@ function bootstrap(counters, pages, history) {
     	})
 	}else{
 		STOPPED = true
-		log.fileerror("Done !")
+		log.fileerror("Done !", true)
 	}
 }
 
@@ -133,7 +133,7 @@ function processPage(counters, page , parameters, history, passdown){
 	}
 	graph.get(id + "/videos", function(err, req){
 		if(err){
-			log.fileerror('cannot get videos of page with id : ' + id)
+			log.fileerror('cannot get videos of page with id : ' + id, true)
 			log.stack(err)
 			bootstrap(counters, passdown.pages, history)
 		}else{
@@ -155,7 +155,7 @@ function processList(counters, pageId, list, parameters, history, passdown){
 	} else if(paging['next'] != null){
 		graph.get(paging.next, function(err, req){
 			if(err){
-				log.fileerror('error getting next video page with id : ' + pageId)
+				log.fileerror('error getting next video page with id : ' + pageId, true)
 				log.stack(err)
 				bootstrap(counters, passdown.pages, history)
 			}else{
@@ -170,7 +170,7 @@ function processList(counters, pageId, list, parameters, history, passdown){
 
 function processVideo(counters, pageId , video, parameters, history, passdown){
 	if(STOP){
-		log.fileerror(" Stoped by master ")
+		log.fileerror(" Stoped by master ", true)
 		counters[0] = passdown.pages.length
 		bootstrap(counters, passdown.pages, history)
 	}else{
@@ -185,7 +185,7 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 			graph.get(id,fields, function(err,req){
 				if(err){
 					history[pageId].videos[id].processing = false
-					log.fileerror('error getting info video with id : ' + id)
+					log.fileerror('error getting info video with id : ' + id, true)
 					log.stack(err)
 					processList(counters, pageId, passdown.list, parameters, history, passdown)
 				}else{
@@ -260,7 +260,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 			videoOptions.size = state.size.total
 			log.info(`downloading video id : ${videoId} | ${prettybytes(state.size.transferred)} / ${prettybytes(state.size.total)} ${Math.round(state.percent*100)}% @ ${state.speed}s`)
 		}).on('error', function (err) {
-			log.fileerror('error downloading video with id : ' + videoId)
+			log.fileerror('error downloading video with id : ' + videoId, true)
 			log.stack(err)
 			if(quota.downloaded == null){
 				quota.downloaded = jsonfile.readFileSync(QUOTA_FILE).downloaded
@@ -287,7 +287,7 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 		    history[pageId].videos[videoId].time_processed = debug.getDate()
 		    jsonfile.writeFileSync(HISTORY_FILE, history)
 		    if(quota.uploaded >= quota.maxupload && quota.maxupload > 0){
-		    		log.fileerror("max upload limit met")
+		    		log.fileerror("max upload limit met", true)
 		    	}
 		    uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		}).pipe(fs.createWriteStream(videoOptions.file));
@@ -318,25 +318,23 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		        body: fs.createReadStream(videoOptions.file)
 		    }
 		}, function(err, data){
-			console.log("########################################")
-			console.log(videoOptions.tags)
 			history[pageId].videos[videoId].processing = false
 			if(err){
-				log.fileerror('error uploading video with id : ' + videoId)
-				log.stack(err)
-				history[pageId].videos[videoId].uploadFailed = true
-				history[pageId].videos[videoId].time_processed = debug.getDate()
-		    	jsonfile.writeFileSync(HISTORY_FILE, history)
 		    	if(err['errors'][0]['reason'] == "invalidTitle" || err['errors'][0]['reason'] == "invalidDescription"){
+		    		console.log("########################################")
 		    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
+		    		log.fileerror('error uploading video with id : ' + videoId)
+					log.stack(err)
+					history[pageId].videos[videoId].uploadFailed = true
+					history[pageId].videos[videoId].time_processed = debug.getDate()
 		    		jsonfile.writeFileSync(HISTORY_FILE, history)
 		    	}
 
 		    	if(err['errors'][0]['reason'] == "quotaExceeded" || err['errors'][0]['reason'] == "uploadLimitExceeded" || err['errors'][0]['reason'] == "rateLimitExceeded"){
-		    		log.fileerror("STOPED PROCESSING for 24 hours " )
+		    		log.fileerror("STOPED PROCESSING for 24 hours ", true)
 		    		setTimeout(
 		    			function (){
-		    				log.fileerror("STARTED PROCESSING" )
+		    				log.fileerror("STARTED PROCESSING", true)
 		    				var counters = [0,0]
 							var history = jsonfile.readFileSync(HISTORY_FILE)
 							var pages = require('./pageURLs')
@@ -344,8 +342,13 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    			}, 86400000);
 
 		    	}else if(err['errors'][0]['reason'] == "authorizationRequired" || err['errors'][0]['reason'] == "forbidden"){
-		    		log.fileerror('Reaouthorize from ' + authUrl)
+		    		log.fileerror('Reaouthorize from ' + authUrl, true)
 		    	}else{
+		    		log.fileerror('error uploading video with id : ' + videoId, true)
+					log.stack(err)
+					history[pageId].videos[videoId].uploadFailed = true
+					history[pageId].videos[videoId].time_processed = debug.getDate()
+			    	jsonfile.writeFileSync(HISTORY_FILE, history)
 		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    	}
 			}
@@ -361,7 +364,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    	history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
 		    	if(quota.uploaded >= quota.maxupload && quota.maxupload > 0){
-		    		log.fileerror("max upload limit met")
+		    		log.fileerror("max upload limit met", true)
 		    	}
 		    	processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    }

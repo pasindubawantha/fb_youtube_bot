@@ -4,9 +4,11 @@ var secrets = require('../../secrets.js').mail
 const LOG_FILE = './log.txt'
 const LOG_STACK_FILE = './errorlog.txt'
 
-function error(msg){
+function error(msg, mail=false){
 		debug.error(debug.getDate().concat(" ").concat(msg))
-		sendMail(msg)
+		if(mail){
+			sendMail(msg)
+		}
 }
 function info(msg){
 		debug.info(debug.getDate().concat(" ").concat(msg))
@@ -14,9 +16,9 @@ function info(msg){
 function warn(msg){
 		debug.warn(debug.getDate().concat(" ").concat(msg))
 }
-function fileerror(msg){
+function fileerror(msg , mail=false){
 	var massage = debug.getDate() + ' ' + msg
-	error(msg)
+	error(msg , mail)
 	fileLogger(massage)
 }
 function fileinfo(msg){
@@ -41,7 +43,6 @@ function stacktrace(message){
 	        error("Can't log stack trace to file : " + LOG_STACK_FILE)
 	    }
 	});
-	sendMail(message) 
 }
 function sendMail(msg){
 	var mailjet = require('node-mailjet')
