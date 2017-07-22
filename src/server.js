@@ -191,11 +191,11 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 				}else{
 					var tags = parameters.tags
 					var title = parameters.title
-					var discription = parameters.discription
+					var description = parameters.description
 					var catogoryId = parameters.catogoryId
 					if(req['description'] != null){
 						if(req['description'].length > parameters.minDescriptionLength){
-							discription = req['description']
+							description = req['description']
 							if(req['description'].length < parameters.maxTitleLength){
 								title = req['description']
 							}
@@ -205,7 +205,7 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 						if(req['title'].length > parameters.minTitleLength){
 							title = req['title']
 							if(req['description'] === null){
-								discription = req['title']
+								description = req['title']
 							}
 						}
 					}
@@ -219,7 +219,7 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 						if(history[pageId].videos[id].uploadError == "invalidTitle"){
 							title = parameters.title
 						}else if(history[pageId].videos[id].uploadError == "invalidDescription"){
-							discription = parameters.discription
+							description = parameters.description
 						}else if(history[pageId].videos[id].uploadError == "invalidTags"){
 							tags = parameters.tags
 						}
@@ -322,6 +322,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 			if(err){
 		    	if(err['errors'][0]['reason'] == "invalidTitle" || err['errors'][0]['reason'] == "invalidDescription"){
 		    		console.log("########################################")
+		    		console.log(videoOptions)
 		    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
 		    		log.fileerror('error uploading video with id : ' + videoId)
 					log.stack(err)
