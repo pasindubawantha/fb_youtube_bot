@@ -323,12 +323,10 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
 		    		log.fileerror('error uploading video with id : ' + videoId)
 					log.stack(err)
-					console.log("########################################")
-		    		console.log(videoOptions)
 					history[pageId].videos[videoId].uploadFailed = true
 					history[pageId].videos[videoId].time_processed = debug.getDate()
 		    		jsonfile.writeFileSync(HISTORY_FILE, history)
-		    		//processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    	}else if(err['errors'][0]['reason'] == "quotaExceeded" || err['errors'][0]['reason'] == "uploadLimitExceeded" || err['errors'][0]['reason'] == "rateLimitExceeded"){
 		    		log.fileerror("STOPED PROCESSING for 24 hours ", true)
 		    		setTimeout(
