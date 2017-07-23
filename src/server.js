@@ -320,14 +320,20 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 			history[pageId].videos[videoId].processing = false
 			if(err){
 		    	if(err['errors'][0]['reason'] == "invalidTitle" || err['errors'][0]['reason'] == "invalidDescription"){
-		    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
-		    		log.fileerror('error uploading video with id : ' + videoId)
-					log.stack(err)
-					history[pageId].videos[videoId].uploadFailed = true
-					history[pageId].videos[videoId].time_processed = debug.getDate()
-		    		jsonfile.writeFileSync(HISTORY_FILE, history)
-		    		counters[1]--
-		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+		    		if(history[pageId].videos[videoId].uploadError != null){
+		    			log.fileerror('error uploading video with id : ' + videoId, true)
+		    			log.stack(err)
+		    			processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+		    		}else{
+			    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
+			    		log.fileerror('error uploading video with id : ' + videoId)
+						log.stack(err)
+						history[pageId].videos[videoId].uploadFailed = true
+						history[pageId].videos[videoId].time_processed = debug.getDate()
+			    		jsonfile.writeFileSync(HISTORY_FILE, history)
+			    		counters[1]--
+			    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+		    		}
 		    	}else if(err['errors'][0]['reason'] == "quotaExceeded" || err['errors'][0]['reason'] == "uploadLimitExceeded" || err['errors'][0]['reason'] == "rateLimitExceeded"){
 		    		log.fileerror("STOPED PROCESSING for 24 hours ", true)
 		    		setTimeout(
