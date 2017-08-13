@@ -390,7 +390,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 	function uploadspeed(){
 		var total = videoOptions.size
 		var trasfered = req.req.connection._bytesDispatched
-        if (trasfered < total) {
+        if (trasfered < total && trasfered != null && total != null ) {
         	log.info(`uploading video id : ${videoId} | ${prettybytes(trasfered)} / ${prettybytes(total)} ${Math.round(trasfered/total*100)}%`);
 	        setTimeout(function (){uploadspeed()}, 1000);
         }
