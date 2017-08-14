@@ -320,7 +320,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 			history[pageId].videos[videoId].processing = false
 			if(err){
 				if(err['errors'] == null || err['errors'][0] == null || err['errors'][0]['reason'] == null){
-					log.fileerror('error uploading video with id : ' + videoId, true)
+					log.fileerror('error uploading video with id : ' + videoId, false)
 					log.stack(err)
 					history[pageId].videos[videoId].uploadFailed = true
 					history[pageId].videos[videoId].time_processed = debug.getDate()
@@ -355,7 +355,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    	}else if(err['errors'][0]['reason'] == "authorizationRequired" || err['errors'][0]['reason'] == "forbidden"){
 		    		log.fileerror('Reaouthorize from ' + authUrl, true)
 		    	}else{
-		    		log.fileerror('error uploading video with id : ' + videoId, true)
+		    		log.fileerror('error uploading video with id : ' + videoId, false)
 					log.stack(err)
 					history[pageId].videos[videoId].uploadFailed = true
 					history[pageId].videos[videoId].time_processed = debug.getDate()
