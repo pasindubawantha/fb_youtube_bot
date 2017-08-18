@@ -257,7 +257,9 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 		progress(request(videoOptions.url)
 		).on('progress', function (state){
 			videoOptions.size = state.size.total
-			log.info(`downloading video id : ${videoId} | ${prettybytes(state.size.transferred)} / ${prettybytes(state.size.total)} ${Math.round(state.percent*100)}% @ ${state.speed}s`)
+			if(state.size.transferred != null && state.size.total != null){
+				log.info(`downloading video id : ${videoId} | ${prettybytes(state.size.transferred)} / ${prettybytes(state.size.total)} ${Math.round(state.percent*100)}% @ ${state.speed}s`)
+			}
 		}).on('error', function (err) {
 			log.fileerror('error downloading video with id : ' + videoId, true)
 			log.stack(err)
