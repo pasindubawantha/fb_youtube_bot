@@ -246,6 +246,10 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 
 
 function downloadVideo(counters, pageId, videoId, videoOptions, history, passdown){
+	console.log("################ if")
+	console.log(!STOP)
+	console.log((quota.downloaded < quota.maxdownload || quota.maxdownload == 0 || quota.downloaded == null))
+	console.log(!history[pageId].videos[videoId].downloaded)
 	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0 || quota.downloaded == null) && !STOP){
 		var  directory = "./videos/" + pageId + '/'
 		var filename = videoId + '.mp4'
@@ -293,8 +297,8 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 		    uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		}).pipe(fs.createWriteStream(videoOptions.file));
 	}else{
-		log.warn("video already downloaded id : " + videoId + " file : " + videoOptions.file)
 		videoOptions.file = history[pageId].videos[videoId].file
+		log.warn("video already downloaded id : " + videoId + " file : " + videoOptions.file)
 		uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 	}
 }
