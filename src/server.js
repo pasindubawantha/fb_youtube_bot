@@ -246,12 +246,6 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 
 
 function downloadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	console.log("################ if")
-
-	console.log(quota.downloaded) 
-	console.log(quota.maxdownload)
-	console.log(quota.downloaded)
-
 	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0 || quota.downloaded == null) && !STOP){
 		var  directory = "./videos/" + pageId + '/'
 		var filename = videoId + '.mp4'
@@ -306,8 +300,6 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 }
 
 function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	console.log("##############################################")
-	console.log(videoOptions.file)
 	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null) && !STOP){
 		var req = youtube.videos.insert({
 		    resource: {
@@ -384,17 +376,23 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		    	history[pageId].videos[videoId].uploaded = true
 		    	history[pageId].videos[videoId].time_processed = debug.getDate()
 		    	jsonfile.writeFileSync(HISTORY_FILE, history)
-		    	if(quota.uploaded >= quota.maxupload && quota.maxupload > 0){
+		    	if(!(quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
 		    		log.fileerror("max upload limit met", true)
+		    	}else{
+		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    	}
-		    	processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 		    }
 		})
 		setTimeout(function (){uploadspeed()}, 2000);
 	}else{
+		if(!(quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
+			log.fileerror("max upload limit met", true)
+		}
+		else{
 		history[pageId].videos[videoId].processing = false
 		log.warn("video already uploaded id : " + videoId + " file : " + videoOptions.file)
 		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+		}
 	}
 
 	function uploadspeed(){
