@@ -300,6 +300,8 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 }
 
 function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown){
+	console.log("##############################################")
+	console.log(videoOptions.file)
 	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null) && !STOP){
 		var req = youtube.videos.insert({
 		    resource: {
