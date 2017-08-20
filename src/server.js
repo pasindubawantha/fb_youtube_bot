@@ -385,6 +385,7 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 		})
 		setTimeout(function (){uploadspeed()}, 2000);
 	}else{
+		console.log(!(quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null))
 		if(!(quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
 			log.fileerror("max upload limit met", true)
 		}
