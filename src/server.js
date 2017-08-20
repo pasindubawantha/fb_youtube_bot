@@ -247,9 +247,11 @@ function processVideo(counters, pageId , video, parameters, history, passdown){
 
 function downloadVideo(counters, pageId, videoId, videoOptions, history, passdown){
 	console.log("################ if")
-	console.log(!STOP)
-	console.log((quota.downloaded < quota.maxdownload || quota.maxdownload == 0 || quota.downloaded == null))
-	console.log(!history[pageId].videos[videoId].downloaded)
+
+	console.log(quota.downloaded) 
+	console.log(quota.maxdownload)
+	console.log(quota.downloaded)
+
 	if(!history[pageId].videos[videoId].downloaded && (quota.downloaded < quota.maxdownload || quota.maxdownload == 0 || quota.downloaded == null) && !STOP){
 		var  directory = "./videos/" + pageId + '/'
 		var filename = videoId + '.mp4'
