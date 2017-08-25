@@ -300,8 +300,8 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 }
 
 function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	if (fs.existsSync(videoOptions.file)) {
-	    if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null) && !STOP){
+    if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null) && !STOP){
+		if (fs.existsSync(videoOptions.file)) {
 			var req = youtube.videos.insert({
 			    resource: {
 			        snippet: {
@@ -386,29 +386,30 @@ function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown)
 			})
 			setTimeout(function (){uploadspeed()}, 2000);
 		}else{
-			if((quota.uploaded > quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
-				log.fileerror("max upload limit met", true)
-			}
-			else{
+			history[pageId].videos[videoId].downloaded = false
 			history[pageId].videos[videoId].processing = false
-			log.warn("video already uploaded id : " + videoId + " file : " + videoOptions.file)
+			jsonfile.writeFileSync(HISTORY_FILE, history)
+			log.warn("video DOWNLOAD corrected: " + videoId + " file : " + videoOptions.file)
 			processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
-			}
 		}
 
-		function uploadspeed(){
-			var total = videoOptions.size
-			var trasfered = req.req.connection._bytesDispatched
-	        if (trasfered < total && trasfered != null && total != null ) {
-	        	log.info(`uploading video id : ${videoId} | ${prettybytes(trasfered)} / ${prettybytes(total)} ${Math.round(trasfered/total*100)}%`);
-		        setTimeout(function (){uploadspeed()}, 1000);
-	        }
-		}
 	}else{
-		history[pageId].videos[videoId].downloaded = false
+		if((quota.uploaded > quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
+			log.fileerror("max upload limit met", true)
+		}
+		else{
 		history[pageId].videos[videoId].processing = false
-		jsonfile.writeFileSync(HISTORY_FILE, history)
-		log.warn("video DOWNLOAD corrected: " + videoId + " file : " + videoOptions.file)
+		log.warn("video already uploaded id : " + videoId + " file : " + videoOptions.file)
 		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+		}
+	}
+
+	function uploadspeed(){
+		var total = videoOptions.size
+		var trasfered = req.req.connection._bytesDispatched
+        if (trasfered < total && trasfered != null && total != null ) {
+        	log.info(`uploading video id : ${videoId} | ${prettybytes(trasfered)} / ${prettybytes(total)} ${Math.round(trasfered/total*100)}%`);
+	        setTimeout(function (){uploadspeed()}, 1000);
+        }
 	}
 }
