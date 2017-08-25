@@ -300,108 +300,115 @@ function downloadVideo(counters, pageId, videoId, videoOptions, history, passdow
 }
 
 function uploadVideo(counters, pageId, videoId, videoOptions, history, passdown){
-	if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null) && !STOP){
-		var req = youtube.videos.insert({
-		    resource: {
-		        snippet: {
-		            title: videoOptions.title,
-		            description: videoOptions.description,
-		            tags: videoOptions.tags
-		        },
-		        status: {
-		            privacyStatus: "public",
-		            license:"youtube",
-		            embeddable:true
-		        }
-		    },
-		    part: "snippet,status",
-		    media: {
-		        body: fs.createReadStream(videoOptions.file)
-		    }
-		}, function(err, data){
-			history[pageId].videos[videoId].processing = false
-			if(err){
-				if(err['errors'] == null || err['errors'][0] == null || err['errors'][0]['reason'] == null){
-					log.fileerror('error uploading video with id : ' + videoId, false)
-					log.stack(err)
-					history[pageId].videos[videoId].uploadFailed = true
-					history[pageId].videos[videoId].time_processed = debug.getDate()
-			    	jsonfile.writeFileSync(HISTORY_FILE, history)
-		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
-				}else if(err['errors'][0]['reason'] == "invalidTitle" || err['errors'][0]['reason'] == "invalidDescription"){
-		    		if(history[pageId].videos[videoId].uploadError != null){
-		    			log.fileerror('error uploading video with id : ' + videoId, true)
-		    			log.stack(err)
-		    			processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
-		    		}else{
-			    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
-			    		log.fileerror('error uploading video with id : ' + videoId)
+	if (fs.existsSync(videoOptions.file)) {
+	    if(!history[pageId].videos[videoId].uploaded && (quota.uploaded < quota.maxupload || quota.maxupload == 0 || quota.uploaded == null) && !STOP){
+			var req = youtube.videos.insert({
+			    resource: {
+			        snippet: {
+			            title: videoOptions.title,
+			            description: videoOptions.description,
+			            tags: videoOptions.tags
+			        },
+			        status: {
+			            privacyStatus: "public",
+			            license:"youtube",
+			            embeddable:true
+			        }
+			    },
+			    part: "snippet,status",
+			    media: {
+			        body: fs.createReadStream(videoOptions.file)
+			    }
+			}, function(err, data){
+				history[pageId].videos[videoId].processing = false
+				if(err){
+					if(err['errors'] == null || err['errors'][0] == null || err['errors'][0]['reason'] == null){
+						log.fileerror('error uploading video with id : ' + videoId, false)
 						log.stack(err)
 						history[pageId].videos[videoId].uploadFailed = true
 						history[pageId].videos[videoId].time_processed = debug.getDate()
-			    		jsonfile.writeFileSync(HISTORY_FILE, history)
-			    		counters[1]--
+				    	jsonfile.writeFileSync(HISTORY_FILE, history)
 			    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
-		    		}
-		    	}else if(err['errors'][0]['reason'] == "quotaExceeded" || err['errors'][0]['reason'] == "uploadLimitExceeded" || err['errors'][0]['reason'] == "rateLimitExceeded"){
-		    		log.fileerror("STOPED PROCESSING for 24 hours ", true)
-		    		setTimeout(
-		    			function (){
-		    				log.fileerror("STARTED PROCESSING", true)
-		    				var counters = [0,0]
-							var history = jsonfile.readFileSync(HISTORY_FILE)
-							var pages = require('./pageURLs')
-							bootstrap(counters, pages ,history)
-		    			}, 86400000);
+					}else if(err['errors'][0]['reason'] == "invalidTitle" || err['errors'][0]['reason'] == "invalidDescription"){
+			    		if(history[pageId].videos[videoId].uploadError != null){
+			    			log.fileerror('error uploading video with id : ' + videoId, true)
+			    			log.stack(err)
+			    			processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+			    		}else{
+				    		history[pageId].videos[videoId].uploadError = err['errors'][0]['reason']
+				    		log.fileerror('error uploading video with id : ' + videoId)
+							log.stack(err)
+							history[pageId].videos[videoId].uploadFailed = true
+							history[pageId].videos[videoId].time_processed = debug.getDate()
+				    		jsonfile.writeFileSync(HISTORY_FILE, history)
+				    		counters[1]--
+				    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+			    		}
+			    	}else if(err['errors'][0]['reason'] == "quotaExceeded" || err['errors'][0]['reason'] == "uploadLimitExceeded" || err['errors'][0]['reason'] == "rateLimitExceeded"){
+			    		log.fileerror("STOPED PROCESSING for 24 hours ", true)
+			    		setTimeout(
+			    			function (){
+			    				log.fileerror("STARTED PROCESSING", true)
+			    				var counters = [0,0]
+								var history = jsonfile.readFileSync(HISTORY_FILE)
+								var pages = require('./pageURLs')
+								bootstrap(counters, pages ,history)
+			    			}, 86400000);
 
-		    	}else if(err['errors'][0]['reason'] == "authorizationRequired" || err['errors'][0]['reason'] == "forbidden"){
-		    		log.fileerror('Reaouthorize from ' + authUrl, true)
-		    	}else{
-		    		log.fileerror('error uploading video with id : ' + videoId, false)
-					log.stack(err)
-					history[pageId].videos[videoId].uploadFailed = true
-					history[pageId].videos[videoId].time_processed = debug.getDate()
-			    	jsonfile.writeFileSync(HISTORY_FILE, history)
-		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
-		    	}
-			}
-		    else{
-		    	if(quota.uploaded == null){
-					quota.uploaded = jsonfile.readFileSync(QUOTA_FILE).uploaded
+			    	}else if(err['errors'][0]['reason'] == "authorizationRequired" || err['errors'][0]['reason'] == "forbidden"){
+			    		log.fileerror('Reaouthorize from ' + authUrl, true)
+			    	}else{
+			    		log.fileerror('error uploading video with id : ' + videoId, false)
+						log.stack(err)
+						history[pageId].videos[videoId].uploadFailed = true
+						history[pageId].videos[videoId].time_processed = debug.getDate()
+				    	jsonfile.writeFileSync(HISTORY_FILE, history)
+			    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+			    	}
 				}
-				if(videoOptions.size > 0){
-					quota.uploaded += videoOptions.size
-		    	}
-		    	log.info("video uploaded id : " + videoId + " file : " + videoOptions.file)
-		    	history[pageId].videos[videoId].uploaded = true
-		    	history[pageId].videos[videoId].time_processed = debug.getDate()
-		    	jsonfile.writeFileSync(HISTORY_FILE, history)
-		    	if((quota.uploaded > quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
-		    		log.fileerror("max upload limit met", true)
-		    	}else{
-		    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
-		    	}
-		    }
-		})
-		setTimeout(function (){uploadspeed()}, 2000);
-	}else{
-		if((quota.uploaded > quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
-			log.fileerror("max upload limit met", true)
+			    else{
+			    	if(quota.uploaded == null){
+						quota.uploaded = jsonfile.readFileSync(QUOTA_FILE).uploaded
+					}
+					if(videoOptions.size > 0){
+						quota.uploaded += videoOptions.size
+			    	}
+			    	log.info("video uploaded id : " + videoId + " file : " + videoOptions.file)
+			    	history[pageId].videos[videoId].uploaded = true
+			    	history[pageId].videos[videoId].time_processed = debug.getDate()
+			    	jsonfile.writeFileSync(HISTORY_FILE, history)
+			    	if((quota.uploaded > quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
+			    		log.fileerror("max upload limit met", true)
+			    	}else{
+			    		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+			    	}
+			    }
+			})
+			setTimeout(function (){uploadspeed()}, 2000);
+		}else{
+			if((quota.uploaded > quota.maxupload || quota.maxupload == 0 || quota.uploaded == null)){
+				log.fileerror("max upload limit met", true)
+			}
+			else{
+			history[pageId].videos[videoId].processing = false
+			log.warn("video already uploaded id : " + videoId + " file : " + videoOptions.file)
+			processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
+			}
 		}
-		else{
-		history[pageId].videos[videoId].processing = false
-		log.warn("video already uploaded id : " + videoId + " file : " + videoOptions.file)
-		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
-		}
-	}
 
-	function uploadspeed(){
-		var total = videoOptions.size
-		var trasfered = req.req.connection._bytesDispatched
-        if (trasfered < total && trasfered != null && total != null ) {
-        	log.info(`uploading video id : ${videoId} | ${prettybytes(trasfered)} / ${prettybytes(total)} ${Math.round(trasfered/total*100)}%`);
-	        setTimeout(function (){uploadspeed()}, 1000);
-        }
+		function uploadspeed(){
+			var total = videoOptions.size
+			var trasfered = req.req.connection._bytesDispatched
+	        if (trasfered < total && trasfered != null && total != null ) {
+	        	log.info(`uploading video id : ${videoId} | ${prettybytes(trasfered)} / ${prettybytes(total)} ${Math.round(trasfered/total*100)}%`);
+		        setTimeout(function (){uploadspeed()}, 1000);
+	        }
+		}
+	}else{
+		history[pageId].videos[videoId].downloaded = false
+		history[pageId].videos[videoId].processing = false
+		jsonfile.writeFileSync(HISTORY_FILE, history)
+		log.warn("video DOWNLOAD corrected: " + videoId + " file : " + videoOptions.file)
+		processList(counters, pageId, passdown.list, passdown.parameters, history, passdown)
 	}
-	
 }
